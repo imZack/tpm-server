@@ -1,0 +1,70 @@
+resources:
+- repo: self
+
+trigger:
+  branches:
+    include:
+    - '*'
+
+jobs:
+- job: LinuxAMD64
+  pool:
+    vmImage: 'ubuntu-16.04'
+  workspace:
+    clean: 'all'
+  strategy:
+    matrix:
+      AMD64:
+        ARCH: 'AMD64'
+  steps:
+    - script: |
+        docker run \
+          -e OUTPUT_DIR -e ARCH \
+          -w /workspace \
+          -v `pwd`:/workspace \
+          -v $OUTPUT_DIR:/output \
+          -i --rm --privileged \
+          debian:9 \
+          bash build.sh
+      env:
+        SDK_TAG: '2019-05-16'
+        OUTPUT_DIR: $(Build.ArtifactStagingDirectory)
+      displayName: 'Build'
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: tpm_server_$(ARCH)
+        targetPath: $(Build.ArtifactStagingDirectory)
+
+- job: LinuxARM
+  pool:
+    vmImage: 'ubuntu-16.04'
+  workspace:
+    clean: 'all'
+  strategy:
+    matrix:
+      ARM:
+        ARCH: 'ARM'
+  steps:
+    - script: |
+        wget https://github.com/multiarch/qemu-user-static/releases/download/v4.0.0-2/qemu-arm-static
+        chmod +x qemu-arm-static
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      displayName: 'Download QEMU & Configure register'
+    - script: |
+        docker run \
+          -e OUTPUT_DIR -e ARCH \
+          -w /workspace \
+          -v `pwd`:/workspace \
+          -v $OUTPUT_DIR:/output \
+          -v `pwd`/qemu-arm-static:/usr/bin/qemu-arm-static \
+          -i --rm --privileged \
+          arm32v7/debian:9 \
+          bash ./build.sh
+      env:
+        SDK_TAG: '2019-05-16'
+        OUTPUT_DIR: $(Build.ArtifactStagingDirectory)
+      displayName: 'Build'
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: tpm_server_$(ARCH)
+        targetPath: $(Build.ArtifactStagingDirectory)
