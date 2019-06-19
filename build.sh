@@ -17,4 +17,4 @@ pip install exodus-bundler
 cd src
 make
 
-exodus --output "/output/tpm_server_$ARCH" tpm_server
+exodus -v --output "/output/tpm_server_$ARCH" tpm_server
