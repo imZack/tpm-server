@@ -23,7 +23,7 @@ jobs:
           -w /workspace \
           -v `pwd`:/workspace \
           -v $OUTPUT_DIR:/output \
-          -i --rm --privileged \
+          --rm --privileged \
           debian:9 \
           bash build.sh
       env:
@@ -57,7 +57,7 @@ jobs:
           -v `pwd`:/workspace \
           -v $OUTPUT_DIR:/output \
           -v `pwd`/qemu-arm-static:/usr/bin/qemu-arm-static \
-          -i --rm --privileged \
+          --rm --privileged \
           arm32v7/debian:9 \
           bash ./build.sh
       env:

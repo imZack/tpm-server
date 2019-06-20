@@ -5,6 +5,7 @@ env
 
 apt-get update
 apt-get install -y \
+  musl-tools \
   build-essential \
   libssl-dev \
   python \
